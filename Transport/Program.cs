@@ -12,7 +12,10 @@ namespace Transport
     {
         private static void Main()
         {
-            var grid = new SquareGrid(10, 10);
+            var grid = new SquareTileGrid(10, 10);
+
+            var roadTile = new Tile(1);
+            var sandRoadTile = new Tile(2);
 
             var lineY = 0;
             foreach (var line in File.ReadLines("Assets\\map.txt"))
@@ -20,7 +23,20 @@ namespace Transport
                 var lineX = 0;
                 foreach (var s in line.Split(","))
                 {
-                    grid.SetWalkable(lineX, lineY, s == "1");
+                    if (s == "r")
+                    {
+                        grid.SetTile(lineX, lineY, roadTile);
+                    }
+                    else if (s == "s")
+                    {
+                        grid.SetTile(lineX, lineY, sandRoadTile);
+                    }
+                    else
+                    {
+                        grid.SetTile(lineX, lineY, Tile.Empty);
+                    }
+
+
                     lineX++;
                 }
 
@@ -30,7 +46,7 @@ namespace Transport
             const int tileWidth = 64;
             const int tileHeight = 64;
 
-            const int speed = 128;
+            const int MaxSpeed = 128;
 
 
             var window = new RenderWindow(new VideoMode((uint) grid.Width * tileWidth, (uint) grid.Height * tileHeight), "Transport");
@@ -54,24 +70,29 @@ namespace Transport
                     var position = new Vector2i(x, y);
 
                     var tileIndex = 0;
-                    if (grid.IsWalkable(position))
+                    var tile = grid.GetTile(position);
+                    if (tile.IsWalkable)
                     {
-                        if (grid.IsWalkable(position + Directions.Up))
+                        var neighbourTile = grid.GetTile(position + Directions.Up);
+                        if (neighbourTile.IsWalkable)
                         {
                             tileIndex += 1;
                         }
 
-                        if (grid.IsWalkable(position + Directions.Right))
+                        neighbourTile = grid.GetTile(position + Directions.Right);
+                        if (neighbourTile.IsWalkable)
                         {
                             tileIndex += 2;
                         }
 
-                        if (grid.IsWalkable(position + Directions.Down))
+                        neighbourTile = grid.GetTile(position + Directions.Down);
+                        if (neighbourTile.IsWalkable)
                         {
                             tileIndex += 4;
                         }
 
-                        if (grid.IsWalkable(position + Directions.Left))
+                        neighbourTile = grid.GetTile(position + Directions.Left);
+                        if (neighbourTile.IsWalkable)
                         {
                             tileIndex += 8;
                         }
@@ -129,6 +150,11 @@ namespace Transport
                         }
                     }
 
+                    if (tile == sandRoadTile)
+                    {
+                        tileRect = new IntRect(tileRect.Left, tileRect.Top + 128, tileRect.Width, tileRect.Height);
+                    }
+
                     terrainSprites.Add(new Sprite(terrainTexture, tileRect)
                     {
                         Position = new Vector2f(x * tileWidth, y * tileHeight)
@@ -144,8 +170,6 @@ namespace Transport
 
                 var tileX = args.X / tileWidth;
                 var tileY = args.Y / tileHeight;
-
-                if (!grid.IsWalkable(tileX, tileY)) return;
 
                 var tankX = (int) (tankSprite.Position.X / tileWidth);
                 var tankY = (int) (tankSprite.Position.Y / tileHeight);
@@ -188,6 +212,10 @@ namespace Transport
                     var direction = queue.Peek() - tankSprite.Position;
                     if (direction.Length() > 1)
                     {
+                        var tankX = (int)(tankSprite.Position.X / tileWidth);
+                        var tankY = (int)(tankSprite.Position.Y / tileHeight);
+                        var tile = grid.GetTile(tankX, tankY);
+                        var speed = (float) MaxSpeed / tile.MovementCost;
                         tankSprite.Position += direction.Normalized() * speed * deltaTime;
                     }
                     else

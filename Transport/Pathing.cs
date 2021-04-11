@@ -9,9 +9,7 @@ namespace Transport
 {
     class Pathing
     {
-       
-
-        public static List<Vector2i> Find(SquareGrid grid, Vector2i startPosition, Vector2i endPosition)
+        public static List<Vector2i> Find(SquareTileGrid tileGrid, Vector2i startPosition, Vector2i endPosition)
         {
             var manhattanDistance = (endPosition - startPosition).ManhattanDistance();
 
@@ -54,12 +52,14 @@ namespace Transport
                 foreach (var direction in Directions.All)
                 {
                     var neighbourPosition = currentNode.Position + direction;
-                    if (!grid.IsWalkable(neighbourPosition)) continue;
+
+                    var neighbourTile = tileGrid.GetTile(neighbourPosition);
+                    if (!neighbourTile.IsWalkable) continue;
 
                     var neighbourNode = new Node(neighbourPosition);
                     if (closedSet.Contains(neighbourNode)) continue;
 
-                    var gCost = currentNode.GCost + 1;
+                    var gCost = currentNode.GCost + neighbourTile.MovementCost;
                     if (gCost < neighbourNode.GCost || !openSet.Contains(neighbourNode))
                     {
                         neighbourNode.GCost = gCost;
