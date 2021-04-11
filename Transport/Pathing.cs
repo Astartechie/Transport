@@ -9,7 +9,7 @@ namespace Transport
 {
     class Pathing
     {
-        private static readonly Vector2i[] Directions = {new Vector2i(0, -1), new Vector2i(1, 0), new Vector2i(0, 1), new Vector2i(-1, 0)};
+       
 
         public static List<Vector2i> Find(SquareGrid grid, Vector2i startPosition, Vector2i endPosition)
         {
@@ -51,7 +51,7 @@ namespace Transport
                     return path;
                 }
 
-                foreach (var direction in Directions)
+                foreach (var direction in Directions.All)
                 {
                     var neighbourPosition = currentNode.Position + direction;
                     if (!grid.IsWalkable(neighbourPosition)) continue;

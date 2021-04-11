@@ -50,8 +50,86 @@ namespace Transport
             {
                 for (var x = 0; x < grid.Width; x++)
                 {
-                    var tileOffset = grid.IsWalkable(x, y) ? new IntRect(tileWidth * 2, tileHeight, tileWidth, tileHeight) : new IntRect(0, 0, tileWidth, tileHeight);
-                    terrainSprites.Add(new Sprite(terrainTexture, tileOffset)
+                    var tileRect = new IntRect(0, 0, tileWidth, tileHeight);
+                    var position = new Vector2i(x, y);
+
+                    var tileIndex = 0;
+                    if (grid.IsWalkable(position))
+                    {
+                        if (grid.IsWalkable(position + Directions.Up))
+                        {
+                            tileIndex += 1;
+                        }
+
+                        if (grid.IsWalkable(position + Directions.Right))
+                        {
+                            tileIndex += 2;
+                        }
+
+                        if (grid.IsWalkable(position + Directions.Down))
+                        {
+                            tileIndex += 4;
+                        }
+
+                        if (grid.IsWalkable(position + Directions.Left))
+                        {
+                            tileIndex += 8;
+                        }
+
+                        switch (tileIndex)
+                        {
+                            case 0:
+                            case 1:
+                            case 2:
+                            case 4:
+                            case 8:
+                                tileRect = new IntRect(0, 128, tileWidth, tileHeight);
+                                break;
+
+                            case 3:
+                                tileRect = new IntRect(320, 64, tileWidth, tileHeight);
+                                break;
+
+                            case 5:
+                                tileRect = new IntRect(64, 0, tileWidth, tileHeight);
+                                break;
+
+                            case 6:
+                                tileRect = new IntRect(192, 64, tileWidth, tileHeight);
+                                break;
+
+                            case 7:
+                                tileRect = new IntRect(192, 0, tileWidth, tileHeight);
+                                break;
+                            case 9:
+                                tileRect = new IntRect(384, 64, tileWidth, tileHeight);
+                                break;
+                            case 10:
+                                tileRect = new IntRect(128, 0, tileWidth, tileHeight);
+                                break;
+                            case 11:
+                                tileRect = new IntRect(320, 0, tileWidth, tileHeight);
+                                break;
+
+                            case 12:
+                                tileRect = new IntRect(256, 64, tileWidth, tileHeight);
+                                break;
+
+                            case 13:
+                                tileRect = new IntRect(256, 0, tileWidth, tileHeight);
+                                break;
+
+                            case 14:
+                                tileRect = new IntRect(384, 0, tileWidth, tileHeight);
+                                break;
+
+                            default:
+                                tileRect = new IntRect(128, 64, tileWidth, tileHeight);
+                                break;
+                        }
+                    }
+
+                    terrainSprites.Add(new Sprite(terrainTexture, tileRect)
                     {
                         Position = new Vector2f(x * tileWidth, y * tileHeight)
                     });
